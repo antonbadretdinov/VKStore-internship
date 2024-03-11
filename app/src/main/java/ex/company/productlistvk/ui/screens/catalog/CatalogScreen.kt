@@ -125,10 +125,15 @@ fun CatalogScreen(
                     columns = GridCells.Adaptive(minSize = 200.dp),
                 ) {
                     items(catalogUIState.value.products.size) { index ->
+
+                        val catalogItem = catalogUIState.value.products[index]
+
                         CatalogItem(
-                            title = catalogUIState.value.products[index].title,
-                            description = catalogUIState.value.products[index].description,
-                            thumbNail = catalogUIState.value.products[index].thumbnail
+                            title = catalogItem.title,
+                            description = catalogItem.description,
+                            thumbNail = catalogItem.thumbnail,
+                            price = catalogItem.price,
+                            rating = catalogItem.rating
                         )
                     }
 
@@ -192,7 +197,6 @@ fun CatalogScreen(
                     modifier = Modifier.padding(16.dp),
                     onClick = {
                         reloadPage = true
-                        /*catalogViewModel.getProductsByPage(currentPageState)*/
                     }) {
                     Text(text = stringResource(id = R.string.try_again))
                 }

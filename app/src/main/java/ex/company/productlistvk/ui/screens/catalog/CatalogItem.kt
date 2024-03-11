@@ -2,13 +2,16 @@ package ex.company.productlistvk.ui.screens.catalog
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,6 +33,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -41,13 +45,16 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import ex.company.productlistvk.R
+import ex.company.productlistvk.ui.theme.rating_star_color
 
 @ExperimentalMaterial3Api
 @Composable
 fun CatalogItem(
     title: String,
     description: String,
-    thumbNail: String
+    thumbNail: String,
+    price: Int,
+    rating: Double
 ) {
 
     var size by remember {
@@ -57,7 +64,6 @@ fun CatalogItem(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(3f / 4f)
             .padding(4.dp),
         shape = RoundedCornerShape(16.dp),
         onClick = {
@@ -87,6 +93,37 @@ fun CatalogItem(
                 contentDescription = stringResource(id = R.string.catalog_item_description),
                 contentScale = ContentScale.Crop
             )
+
+            Row(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "$price${stringResource(id = R.string.currency_sign)}",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Row {
+                    Icon(
+                        modifier = Modifier
+                            .defaultMinSize(20.dp)
+                            .padding(horizontal = 4.dp),
+                        painter = painterResource(id = R.drawable.ic_star),
+                        contentDescription = stringResource(id = R.string.rating_star_description),
+                        tint = rating_star_color
+                    )
+
+                    Text(
+                        text = rating.toString(),
+                        fontSize = 16.sp
+                    )
+                }
+
+            }
 
             val containerWidthDp = size.width.dp
 
@@ -120,7 +157,7 @@ fun CatalogItem(
 
             Text(
                 modifier = Modifier
-                    .padding(horizontal = 8.dp)
+                    .padding(8.dp)
                     .graphicsLayer {
                         compositingStrategy = CompositingStrategy.Offscreen
                     }
@@ -134,8 +171,6 @@ fun CatalogItem(
                 fontSize = 12.sp,
                 softWrap = false
             )
-
-
         }
     }
 }
