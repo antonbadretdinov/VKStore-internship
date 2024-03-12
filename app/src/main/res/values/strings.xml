@@ -2,11 +2,15 @@
     <string name="app_name">VK store</string>
 
     <string name="all_categories">All categories</string>
+
     <string name="no_internet">No internet connection</string>
+
+    <string name="no_internet_icon_description">No internet</string>
     <string name="catalog_item_description">Product picture</string>
     <string name="sort_icon_description">Icon for sort by categories</string>
-    <string name="try_again">Try again</string>
-    <string name="no_internet_icon_description">No internet</string>
-    <string name="currency_sign">$</string>
     <string name="rating_star_description">Icon for rating star</string>
+
+    <string name="try_again">Try again</string>
+
+    <string name="currency_sign">$</string>
 </resources>

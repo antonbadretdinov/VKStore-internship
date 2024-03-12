@@ -54,7 +54,8 @@ fun CatalogItem(
     description: String,
     thumbNail: String,
     price: Int,
-    rating: Double
+    rating: Double,
+    onItemClicked: () -> Unit
 ) {
 
     var size by remember {
@@ -67,7 +68,7 @@ fun CatalogItem(
             .padding(4.dp),
         shape = RoundedCornerShape(16.dp),
         onClick = {
-
+            onItemClicked()
         }
     ) {
         Column(

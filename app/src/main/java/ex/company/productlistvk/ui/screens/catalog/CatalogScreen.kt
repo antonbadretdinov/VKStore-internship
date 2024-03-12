@@ -121,19 +121,26 @@ fun CatalogScreen(
     }
 
     LaunchedEffect(key1 = switchCategoryState) {
-        sortMenuExpanded = false
 
-        withContext(Dispatchers.IO) {
-            totalPageNumber = catalogViewModel.getTotalPagesNumber(
-                if (currentCategory != context.getString(R.string.all_categories))
-                    currentCategory
-                else
-                    ""
-            )
+        if (switchCategoryState) {
+            sortMenuExpanded = false
+
+            withContext(Dispatchers.IO) {
+                totalPageNumber = catalogViewModel.getTotalPagesNumber(
+                    if (currentCategory != context.getString(R.string.all_categories))
+                        currentCategory
+                    else
+                        ""
+                )
+            }
+
+            lazyGridState.scrollToItem(0)
+            scrollBehavior.state.heightOffset = 0f
+            currentPageState = 1
+
+            switchCategoryState = false
         }
 
-
-        switchCategoryState = false
     }
 
 
@@ -164,9 +171,6 @@ fun CatalogScreen(
                         onDismissRequest = { sortMenuExpanded = false }) {
 
 
-                        /*
-                        * First DropdownMenuItem for all categories
-                        * */
                         DropdownMenuItem(
                             text = {
                                 Text(text = stringResource(id = R.string.all_categories))
@@ -174,14 +178,8 @@ fun CatalogScreen(
                             onClick = {
                                 catalogViewModel.getAllProductsByPage()
                                 currentCategory = context.getString(R.string.all_categories)
+
                                 switchCategoryState = true
-
-                                coroutineScope.launch {
-                                    lazyGridState.scrollToItem(0)
-                                    scrollBehavior.state.heightOffset = 0f
-                                }
-                                currentPageState = 1
-
                             })
 
                         repeat(times = categoriesUIState.value.size) { index ->
@@ -200,13 +198,7 @@ fun CatalogScreen(
                                         category = categoriesUIState.value[index]
                                     )
 
-                                    coroutineScope.launch {
-                                        lazyGridState.scrollToItem(0)
-                                        scrollBehavior.state.heightOffset = 0f
-                                    }
-
                                     switchCategoryState = true
-                                    currentPageState = 1
                                 })
                         }
                     }
@@ -235,7 +227,11 @@ fun CatalogScreen(
                             thumbNail = catalogItem.thumbnail,
                             price = catalogItem.price,
                             rating = catalogItem.rating
-                        )
+                        ){
+                            /*
+                            * Navigate to ProductScreen with this item
+                            * */
+                        }
                     }
 
                     item(span = {
@@ -253,19 +249,22 @@ fun CatalogScreen(
                                     pageNumber = page,
                                     pressed = currentPageState == page,
                                     onClick = { newPageClicked ->
+                                        if (currentPageState != newPageClicked) {
+                                            catalogViewModel.getAllProductsByPage(
+                                                newPageClicked,
+                                                category = if (currentCategory != context.getString(
+                                                        R.string.all_categories
+                                                    ))
+                                                    categoriesUIState.value[index]
+                                                else
+                                                    ""
+                                            )
+                                            currentPageState = newPageClicked
 
-                                        catalogViewModel.getAllProductsByPage(
-                                            newPageClicked,
-                                            category = if (currentCategory != context.getString(R.string.all_categories))
-                                                categoriesUIState.value[index]
-                                            else
-                                                ""
-                                        )
-                                        currentPageState = newPageClicked
-
-                                        coroutineScope.launch {
-                                            lazyGridState.scrollToItem(0)
-                                            scrollBehavior.state.heightOffset = 0f
+                                            coroutineScope.launch {
+                                                lazyGridState.scrollToItem(0)
+                                                scrollBehavior.state.heightOffset = 0f
+                                            }
                                         }
                                     })
                             }

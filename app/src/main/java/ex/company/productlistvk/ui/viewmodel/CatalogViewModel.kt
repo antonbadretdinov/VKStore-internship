@@ -71,11 +71,9 @@ class CatalogViewModel(private val catalogRepository: CatalogRepository) : ViewM
         }
     }
 
-
     private fun clearProducts() {
         mutableProductsStateFlow.value = ProductListModel(emptyList(), 0)
     }
-
 
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
@@ -85,5 +83,4 @@ class CatalogViewModel(private val catalogRepository: CatalogRepository) : ViewM
             }
         }
     }
-
 }
