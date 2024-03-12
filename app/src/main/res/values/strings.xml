@@ -1,10 +1,10 @@
 <resources>
     <string name="app_name">VK store</string>
 
-    <string name="catalog">Catalog</string>
+    <string name="all_categories">All categories</string>
     <string name="no_internet">No internet connection</string>
     <string name="catalog_item_description">Product picture</string>
-    <string name="filter_icon_description">Icon for filter</string>
+    <string name="sort_icon_description">Icon for sort by categories</string>
     <string name="try_again">Try again</string>
     <string name="no_internet_icon_description">No internet</string>
     <string name="currency_sign">$</string>

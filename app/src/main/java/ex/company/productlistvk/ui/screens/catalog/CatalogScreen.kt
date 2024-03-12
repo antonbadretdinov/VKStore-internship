@@ -13,6 +13,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,7 +46,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import ex.company.productlistvk.R
 import ex.company.productlistvk.helpers.utils.hasInternetConnection
 import ex.company.productlistvk.ui.viewmodel.CatalogViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,31 +65,76 @@ fun CatalogScreen(
         mutableIntStateOf(1)
     }
 
-    var totalPageNumber by remember {
+    var totalPageNumber by rememberSaveable {
         mutableIntStateOf(0)
     }
 
     val catalogUIState = catalogViewModel.productsStateFlow.collectAsStateWithLifecycle()
 
+    val categoriesUIState = catalogViewModel.categoriesStateFlow.collectAsStateWithLifecycle()
+
     var reloadPage by remember {
         mutableStateOf(false)
     }
 
+    var switchCategoryState by remember {
+        mutableStateOf(false)
+    }
+
+    var currentCategory by rememberSaveable {
+        mutableStateOf(context.getString(R.string.all_categories))
+    }
+
+    var sortMenuExpanded by remember { mutableStateOf(false) }
+
+    val lazyGridState = rememberLazyGridState()
+
+    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
 
     LaunchedEffect(key1 = Unit, key2 = reloadPage) {
-        if (catalogUIState.value.products.isEmpty()) {
-            catalogViewModel.getProductsByPage(currentPageState)
+        if (categoriesUIState.value.isEmpty()) {
+            catalogViewModel.getAllCategories()
         }
 
-        if (totalPageNumber == 0) {
-            totalPageNumber = catalogViewModel.getTotalPagesNumber()
+        if (catalogUIState.value.products.isEmpty()) {
+            catalogViewModel.getAllProductsByPage(
+                currentPageState,
+                if (currentCategory != context.getString(R.string.all_categories))
+                    currentCategory
+                else
+                    ""
+            )
         }
+
+        withContext(Dispatchers.IO) {
+            if (totalPageNumber == 0) {
+                totalPageNumber = catalogViewModel.getTotalPagesNumber(
+                    if (currentCategory != context.getString(R.string.all_categories))
+                        currentCategory
+                    else
+                        ""
+                )
+            }
+        }
+
         reloadPage = false
     }
 
+    LaunchedEffect(key1 = switchCategoryState) {
+        sortMenuExpanded = false
 
-    val lazyGridState = rememberLazyGridState()
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
+        withContext(Dispatchers.IO) {
+            totalPageNumber = catalogViewModel.getTotalPagesNumber(
+                if (currentCategory != context.getString(R.string.all_categories))
+                    currentCategory
+                else
+                    ""
+            )
+        }
+
+
+        switchCategoryState = false
+    }
 
 
     Scaffold(
@@ -98,16 +147,68 @@ fun CatalogScreen(
                     actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 title = {
-                    Text(text = stringResource(id = R.string.catalog))
+                    Text(text = currentCategory)
                 },
                 actions = {
                     IconButton(onClick = {
-
+                        sortMenuExpanded = true
                     }) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_filter),
-                            contentDescription = stringResource(id = R.string.filter_icon_description)
+                            painter = painterResource(id = R.drawable.ic_sort),
+                            contentDescription = stringResource(id = R.string.sort_icon_description)
                         )
+                    }
+
+                    DropdownMenu(
+                        expanded = sortMenuExpanded,
+                        onDismissRequest = { sortMenuExpanded = false }) {
+
+
+                        /*
+                        * First DropdownMenuItem for all categories
+                        * */
+                        DropdownMenuItem(
+                            text = {
+                                Text(text = stringResource(id = R.string.all_categories))
+                            },
+                            onClick = {
+                                catalogViewModel.getAllProductsByPage()
+                                currentCategory = context.getString(R.string.all_categories)
+                                switchCategoryState = true
+
+                                coroutineScope.launch {
+                                    lazyGridState.scrollToItem(0)
+                                    scrollBehavior.state.heightOffset = 0f
+                                }
+                                currentPageState = 1
+
+                            })
+
+                        repeat(times = categoriesUIState.value.size) { index ->
+                            DropdownMenuItem(
+                                text = {
+                                    Text(text = categoriesUIState.value[index].replaceFirstChar {
+                                        it.uppercase()
+                                    })
+                                },
+                                onClick = {
+                                    currentCategory =
+                                        categoriesUIState.value[index].replaceFirstChar {
+                                            it.uppercase()
+                                        }
+                                    catalogViewModel.getAllProductsByPage(
+                                        category = categoriesUIState.value[index]
+                                    )
+
+                                    coroutineScope.launch {
+                                        lazyGridState.scrollToItem(0)
+                                        scrollBehavior.state.heightOffset = 0f
+                                    }
+
+                                    switchCategoryState = true
+                                    currentPageState = 1
+                                })
+                        }
                     }
                 },
                 scrollBehavior = scrollBehavior
@@ -153,14 +254,19 @@ fun CatalogScreen(
                                     pressed = currentPageState == page,
                                     onClick = { newPageClicked ->
 
-                                        catalogViewModel.getProductsByPage(newPageClicked)
+                                        catalogViewModel.getAllProductsByPage(
+                                            newPageClicked,
+                                            category = if (currentCategory != context.getString(R.string.all_categories))
+                                                categoriesUIState.value[index]
+                                            else
+                                                ""
+                                        )
                                         currentPageState = newPageClicked
 
                                         coroutineScope.launch {
                                             lazyGridState.scrollToItem(0)
                                             scrollBehavior.state.heightOffset = 0f
                                         }
-
                                     })
                             }
                         }

@@ -20,7 +20,10 @@ class CatalogViewModel(private val catalogRepository: CatalogRepository) : ViewM
     private val mutableProductsStateFlow = MutableStateFlow(ProductListModel(emptyList(), 0))
     val productsStateFlow: StateFlow<ProductListModel> = mutableProductsStateFlow
 
-    fun getProductsByPage(page: Int = 1) {
+    private val mutableCategoriesStateFlow = MutableStateFlow(emptyList<String>())
+    val categoriesStateFlow: StateFlow<List<String>> = mutableCategoriesStateFlow
+
+    fun getAllProductsByPage(page: Int = 1, category: String = "") {
 
         val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
             println(throwable.message)
@@ -29,19 +32,42 @@ class CatalogViewModel(private val catalogRepository: CatalogRepository) : ViewM
         clearProducts()
         val skip = (page - 1) * FIX_PRODUCTS_NUMBER
         viewModelScope.launch(Dispatchers.IO + coroutineExceptionHandler) {
-            mutableProductsStateFlow.value = catalogRepository.getProductsWithSkipAndLimit(
-                skip = skip,
-                limit = FIX_PRODUCTS_NUMBER
-            )
+            if(category.isEmpty()){
+                mutableProductsStateFlow.value = catalogRepository.getProductsWithSkipAndLimit(
+                    skip = skip,
+                    limit = FIX_PRODUCTS_NUMBER
+                )
+            }else{
+                mutableProductsStateFlow.value = catalogRepository.getProductsByCategoryWithSkipAndLimit(
+                    category = category,
+                    skip = skip,
+                    limit = FIX_PRODUCTS_NUMBER
+                )
+            }
+
         }
     }
 
-    suspend fun getTotalPagesNumber(): Int {
+    suspend fun getTotalPagesNumber(category: String = ""): Int {
         return try {
-            catalogRepository.getAllProducts().total / FIX_PRODUCTS_NUMBER
+            if(category.isNotEmpty()){
+                productsStateFlow.value.products.size / FIX_PRODUCTS_NUMBER
+            }else{
+                catalogRepository.getAllProducts().total / FIX_PRODUCTS_NUMBER
+            }
         }catch (e: Exception){
             e.printStackTrace()
             return 0
+        }
+    }
+
+    fun getAllCategories(){
+        val coroutineExceptionHandler = CoroutineExceptionHandler { _, throwable ->
+            println(throwable.message)
+        }
+
+        viewModelScope.launch(Dispatchers.IO + coroutineExceptionHandler) {
+            mutableCategoriesStateFlow.value = catalogRepository.getAllCategories()
         }
     }
 
