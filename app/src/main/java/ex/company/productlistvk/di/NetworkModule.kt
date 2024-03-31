@@ -12,7 +12,7 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object RetrofitModule {
+object NetworkModule {
 
     @Provides
     fun providesBaseUrl(): String = "https://dummyjson.com/"
