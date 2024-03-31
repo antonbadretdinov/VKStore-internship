@@ -13,6 +13,7 @@ Additionally:
 - Correct error handling when a network request attempt fails.
 
 The project was completed using Jetpack Compose and Material Design 3. The following libraries were also used:
+- Hilt
 - Retrofit2
 - Gson
 - Coroutines
