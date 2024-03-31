@@ -1,8 +1,9 @@
 package ex.company.productlistvk.data.repository
 
 import ex.company.productlistvk.data.network.retrofit.RetrofitApi
+import javax.inject.Inject
 
-class CatalogRepository(private val catalogService: RetrofitApi) {
+class CatalogRepository @Inject constructor(private val catalogService: RetrofitApi) {
 
     suspend fun getAllProducts() = catalogService.getAllProducts()
     suspend fun getAllCategories() = catalogService.getAllCategories()

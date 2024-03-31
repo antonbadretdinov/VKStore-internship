@@ -53,11 +53,8 @@ import kotlinx.coroutines.withContext
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CatalogScreen(
-    catalogViewModel: CatalogViewModel = viewModel(
-        factory = CatalogViewModel.Factory
-    )
+    catalogViewModel: CatalogViewModel = viewModel()
 ) {
-
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -227,7 +224,7 @@ fun CatalogScreen(
                             thumbNail = catalogItem.thumbnail,
                             price = catalogItem.price,
                             rating = catalogItem.rating
-                        ){
+                        ) {
                             /*
                             * Navigate to ProductScreen with this item
                             * */
@@ -254,7 +251,8 @@ fun CatalogScreen(
                                                 newPageClicked,
                                                 category = if (currentCategory != context.getString(
                                                         R.string.all_categories
-                                                    ))
+                                                    )
+                                                )
                                                     categoriesUIState.value[index]
                                                 else
                                                     ""

@@ -1,6 +1,8 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    kotlin("kapt")
+    id ("com.google.dagger.hilt.android")
 }
 
 android {
@@ -50,13 +52,16 @@ android {
 }
 
 dependencies {
+    implementation("com.google.dagger:hilt-android:2.49")
+    kapt("com.google.dagger:hilt-compiler:2.49")
+
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.27.0")
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1")
 
-    implementation("androidx.compose.ui:ui-text-google-fonts:1.6.2")
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.6.4")
 
     implementation("io.coil-kt:coil-compose:2.4.0")
 
@@ -80,4 +85,8 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+}
+
+kapt {
+    correctErrorTypes = true
 }
